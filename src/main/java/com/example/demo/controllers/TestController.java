@@ -23,7 +23,13 @@ public class TestController {
 
     @GetMapping("/manager")
     @PreAuthorize("hasRole('MANAGER')")
-    public String adminAccess() {
+    public String managerAccess() {
         return "Manager Board.";
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String adminAccess() {
+        return "Admin Board.";
     }
 }
