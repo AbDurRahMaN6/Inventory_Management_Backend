@@ -15,6 +15,9 @@ public class SignupRequest {
     @Email
     private String email;
 
+    @NotBlank
+    private String rolling;
+
     private Set<String> roles;
 
     @NotBlank
@@ -43,6 +46,14 @@ public class SignupRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRolling() {
+        return rolling;
+    }
+
+    public void setRolling(String rolling) {
+        this.rolling = rolling;
     }
 
     public Set<String> getRoles() {

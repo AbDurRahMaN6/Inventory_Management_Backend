@@ -28,16 +28,20 @@ public class User {
     @Size(max = 120)
     private String password;
 
+    @NotBlank
+    private String rolling;
+
     @DBRef
     private Set<Role> roles = new HashSet<>();
 
     public User() {
     }
 
-    public User(String username, String email, String password) {
+    public User(String username, String email, String password, String rolling) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.rolling = rolling;
     }
 
     public String getId() {
@@ -71,6 +75,15 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public String getRolling(){
+        return rolling;
+    }
+
+    public void setRolling(String rolling){
+        this.rolling = rolling;
+    }
+
 
     public Set<Role> getRoles() {
         return roles;
