@@ -53,25 +53,12 @@ public class DeviceControllers {
         }
     }
 
-//    @PostMapping("/devices")
-//    public ResponseEntity<Device> createDevice(@RequestBody Device device) {
-//        try {
-//            Device _device = deviceRepository
-//                    .save(new Device(device.getModel(), device.getDeviceType(), false));
-//            return new ResponseEntity<>(_device, HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            log.error("An ERROR Message");
-//
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-
     @PostMapping("/devices")
-    public ResponseEntity<Device> createTutorial(@RequestBody Device device) {
-        log.error("An ERROR Message");
+    public ResponseEntity<Device> createDevices(@RequestBody Device device) {
+//        log.error("An ERROR Message");
         try {
-            Device _tutorial = deviceRepository.save(new Device(device.getModel(), device.getDeviceType(), false));
-            return new ResponseEntity<>(_tutorial, HttpStatus.CREATED);
+            Device _device = deviceRepository.save(new Device(device.getModel(), device.getDeviceType(), false));
+            return new ResponseEntity<>(_device, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
