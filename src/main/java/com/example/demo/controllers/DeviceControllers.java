@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,36 +23,36 @@ public class DeviceControllers {
     @Autowired
     DeviceRepository deviceRepository;
 
-    @GetMapping("/devices")
-    public ResponseEntity<List<Device>> getAllDevices(@RequestParam(required = false) String model) {
-        try {
-            List<Device> devices = new ArrayList<Device>();
+//    @GetMapping("/devices")
+//    public ResponseEntity<List<Device>> getAllDevices(@RequestParam(required = false) String model) {
+//        try {
+//            List<Device> devices = new ArrayList<Device>();
+//
+//            if (model == null)
+//                deviceRepository.findAll().forEach(devices::add);
+//            else
+//                deviceRepository.findByModelContaining(model).forEach(devices::add);
+//
+//            if (devices.isEmpty()) {
+//                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//            }
+//
+//            return new ResponseEntity<>(devices, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
-            if (model == null)
-                deviceRepository.findAll().forEach(devices::add);
-            else
-                deviceRepository.findByModelContaining(model).forEach(devices::add);
-
-            if (devices.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-
-            return new ResponseEntity<>(devices, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/devices/{id}")
-    public ResponseEntity<Device> getDevicesById(@PathVariable("id") long id) {
-        Optional<Device> deviceData = deviceRepository.findById(String.valueOf(id));
-
-        if (deviceData.isPresent()) {
-            return new ResponseEntity<>(deviceData.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+//    @GetMapping("/devices/{id}")
+//    public ResponseEntity<Device> getDevicesById(@PathVariable("id") long id) {
+//        Optional<Device> deviceData = deviceRepository.findById(String.valueOf(id));
+//
+//        if (deviceData.isPresent()) {
+//            return new ResponseEntity<>(deviceData.get(), HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 
     @PostMapping("/devices")
     public ResponseEntity<Device> createDevices(@RequestBody Device device) {
@@ -63,55 +64,59 @@ public class DeviceControllers {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+//@PostMapping("/devices")
+//public Device createDevice(@Valid @RequestBody Device device) {
+//    return deviceRepository.save(device);
+//}
 
-    @PutMapping("/devices/{id}")
-    public ResponseEntity<Device> updateDevice(@PathVariable("id") long id, @RequestBody Device device) {
-        Optional<Device> deviceData = deviceRepository.findById(String.valueOf(id));
+//    @PutMapping("/devices/{id}")
+//    public ResponseEntity<Device> updateDevice(@PathVariable("id") long id, @RequestBody Device device) {
+//        Optional<Device> deviceData = deviceRepository.findById(String.valueOf(id));
+//
+//        if (deviceData.isPresent()) {
+//            Device _device = deviceData.get();
+//            _device.setModel(device.getModel());
+//            _device.setDeviceType(device.getDeviceType());
+//            _device.setPublished(device.isPublished());
+//            return new ResponseEntity<>(deviceRepository.save(_device), HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 
-        if (deviceData.isPresent()) {
-            Device _device = deviceData.get();
-            _device.setModel(device.getModel());
-            _device.setDeviceType(device.getDeviceType());
-            _device.setPublished(device.isPublished());
-            return new ResponseEntity<>(deviceRepository.save(_device), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+//    @DeleteMapping("/devices/{id}")
+//    public ResponseEntity<HttpStatus> deleteDevices(@PathVariable("id") long id) {
+//        try {
+//            deviceRepository.deleteById(String.valueOf(id));
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
-    @DeleteMapping("/devices/{id}")
-    public ResponseEntity<HttpStatus> deleteDevices(@PathVariable("id") long id) {
-        try {
-            deviceRepository.deleteById(String.valueOf(id));
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @DeleteMapping("/devices")
+//    public ResponseEntity<HttpStatus> deleteAllDevices() {
+//        try {
+//            deviceRepository.deleteAll();
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//
+//    }
 
-    @DeleteMapping("/devices")
-    public ResponseEntity<HttpStatus> deleteAllDevices() {
-        try {
-            deviceRepository.deleteAll();
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-    }
-
-    @GetMapping("/devices/published")
-    public ResponseEntity<List<Device>> findByPublished() {
-        try {
-            List<Device> devices = deviceRepository.findByPublished(true);
-
-            if (devices.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(devices, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @GetMapping("/devices/published")
+//    public ResponseEntity<List<Device>> findByPublished() {
+//        try {
+//            List<Device> devices = deviceRepository.findByPublished(true);
+//
+//            if (devices.isEmpty()) {
+//                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//            }
+//            return new ResponseEntity<>(devices, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
 }
