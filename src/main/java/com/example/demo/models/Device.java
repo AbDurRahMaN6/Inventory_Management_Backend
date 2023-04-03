@@ -8,6 +8,7 @@ public class Device {
 
     @Id
     private String id;
+    private String serialId;
 
     private String model;
 
@@ -19,7 +20,8 @@ public class Device {
 
     }
 
-    public Device(String model, String deviceType, boolean published) {
+    public Device(String serialId, String model, String deviceType, boolean published) {
+        this.serialId = serialId;
         this.model = model;
         this.deviceType = deviceType;
         this.published = published;
@@ -31,6 +33,14 @@ public class Device {
 
     public String getId() {
         return id;
+    }
+
+    public String getSerialId() {
+        return serialId;
+    }
+
+    public void setSerialId(String serialId) {
+        this.serialId = serialId;
     }
 
     public String getModel() {
@@ -59,7 +69,7 @@ public class Device {
 
     @Override
     public String toString() {
-        return "Devices [id=" + id + ", model=" + model + ", deviceType=" + deviceType + ", published=" + published + "]";
+        return "Devices [id=" + id + ",serialId=" + serialId + ",  model=" + model + ", deviceType=" + deviceType + ", published=" + published + "]";
     }
 
 }
