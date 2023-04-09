@@ -1,17 +1,20 @@
 package com.example.demo.controllers;
 
 import com.example.demo.models.Device;
+import com.example.demo.models.Role;
+import com.example.demo.models.User;
+import com.example.demo.models.UserRole;
 import com.example.demo.repository.DeviceRepository;
+import com.example.demo.repository.RoleRepository;
+import com.example.demo.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -22,6 +25,11 @@ public class DeviceControllers {
 
     @Autowired
     DeviceRepository deviceRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
     @GetMapping("/devices")
     public ResponseEntity<List<Device>> getAllDevices(@RequestParam(required = false) String model) {
@@ -80,7 +88,6 @@ public class DeviceControllers {
         }
     }
 
-
     @DeleteMapping("/devices/{id}")
     public ResponseEntity<HttpStatus> deleteDevices(@PathVariable("id") String id) {
         try {
@@ -90,7 +97,6 @@ public class DeviceControllers {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @GetMapping("/devices/published")
     public ResponseEntity<List<Device>> findByPublished() {
@@ -105,5 +111,56 @@ public class DeviceControllers {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        Optional<Role> role = roleRepository.findByName(UserRole.ROLE_USER);
+        List<User> user = null;
+        if (role.isPresent()) {
+            user = userRepository.findAll().stream().filter(user1 -> user1.getRoles().stream().anyMatch(role1 -> role1.getId()
+                    .equals(role.get().getId()))).collect(Collectors.toList());
+        }
+        return user;
+    }
+    @GetMapping("/users/{username}")
+    public ResponseEntity<User> getUsersByName(@PathVariable("username") String username) {
+        Optional<User> userData = userRepository.findByUsername(username);
+
+        if (userData.isPresent()) {
+            return new ResponseEntity<>(userData.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/users/{username}")
+    public ResponseEntity<User> updateUsersList(@PathVariable("username") String username, @RequestBody User users) {
+        Optional<User> usersData = userRepository.findByUsername(username);
+
+        if (usersData.isPresent()) {
+            User _users = usersData.get();
+            _users.setUsername(users.getUsername());
+            _users.setEmail(users.getEmail());
+            _users.setRoles(users.getRoles());
+            return new ResponseEntity<>(userRepository.save(_users), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/users/{username}")
+    public ResponseEntity<HttpStatus> deleteUsers(@PathVariable("username") String username) {
+        try {
+            roleRepository.deleteById(username);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+//    User user = userRepository.findByUsername(username);
+//        if (user != null) {
+//        userRepository.delete(user);
+//    }
 
 }
