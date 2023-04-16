@@ -29,6 +29,7 @@ public class AdminController {
 
     @Autowired
     UserRepository userRepository;
+
     @GetMapping("/users")
     public List<User> getAllUsers() {
         Optional<Role> role = roleRepository.findByName(UserRole.ROLE_USER);
@@ -38,6 +39,17 @@ public class AdminController {
                     .equals(role.get().getId()))).collect(Collectors.toList());
         }
         return user;
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<User> getUsersById(@PathVariable("id") String id) {
+        Optional<User> userData = userRepository.findById(id);
+
+        if (userData.isPresent()) {
+            return new ResponseEntity<>(userData.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/managers")
@@ -51,25 +63,43 @@ public class AdminController {
         return user;
     }
 
-    @GetMapping("/users/{username}")
-    public ResponseEntity<User> getUsersByName(@PathVariable("username") String username) {
-        Optional<User> userData = userRepository.findByUsername(username);
 
-        if (userData.isPresent()) {
-            return new ResponseEntity<>(userData.get(), HttpStatus.OK);
+    @GetMapping("/managers/{id}")
+    public ResponseEntity<User> getManagersById(@PathVariable("id") String id) {
+        Optional<User> managerData = userRepository.findById(id);
+
+        if (managerData.isPresent()) {
+            return new ResponseEntity<>(managerData.get(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping("/managers/{username}")
-    public ResponseEntity<User> getManagersByName(@PathVariable("username") String username) {
-        Optional<User> userData = userRepository.findByUsername(username);
+    @PutMapping("/managers/{id}")
+    public ResponseEntity<User> updateManagers(@PathVariable("id") String id, @RequestBody User manager) {
+        Optional<User> managerData = userRepository.findById(id);
 
-        if (userData.isPresent()) {
-            return new ResponseEntity<>(userData.get(), HttpStatus.OK);
+        if (managerData.isPresent()) {
+            User _manager = managerData.get();
+            _manager.setUsername(manager.getUsername());
+            _manager.setEmail(manager.getEmail());
+            _manager.setPassword(manager.getPassword());
+            _manager.setRoles(manager.getRoles());
+            _manager.setRolling(manager.getRolling());
+            return new ResponseEntity<>(userRepository.save(_manager), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @DeleteMapping("/managers/{id}")
+    public ResponseEntity<HttpStatus> deleteManagers(@PathVariable("id") String id) {
+        try {
+            userRepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
