@@ -14,17 +14,17 @@ public class Device {
 
     private String deviceType;
 
-    private boolean published;
+    private boolean available;
 
     public Device() {
 
     }
 
-    public Device(String serialId, String model, String deviceType, boolean published) {
+    public Device(String serialId, String model, String deviceType, boolean available) {
         this.serialId = serialId;
         this.model = model;
         this.deviceType = deviceType;
-        this.published = published;
+        this.available = available;
     }
 
     public void setId(String id) {
@@ -59,17 +59,17 @@ public class Device {
         this.deviceType = deviceType;
     }
 
-    public boolean isPublished() {
-        return published;
+    public boolean isAvailable() {
+        return available;
     }
 
-    public void setPublished(boolean isPublished) {
-        this.published = isPublished;
+    public void setAvailable(boolean isAvailable) {
+        this.available = isAvailable;
     }
 
     @Override
     public String toString() {
-        return "Devices [id=" + id + ",serialId=" + serialId + ",  model=" + model + ", deviceType=" + deviceType + ", published=" + published + "]";
+        return "Devices [id=" + id + ",serialId=" + serialId + ",  model=" + model + ", deviceType=" + deviceType + ", available=" + available + "]";
     }
 
 }

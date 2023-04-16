@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
 public interface DeviceRepository extends MongoRepository<Device, String> {
-    List<Device> findByPublished(boolean published);
+    List<Device> findByAvailable(boolean available);
 
     List<Device> findByModelContaining(String model);
 }
