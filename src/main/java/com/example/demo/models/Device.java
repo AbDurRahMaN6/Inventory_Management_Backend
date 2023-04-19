@@ -1,9 +1,13 @@
 package com.example.demo.models;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "devices")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Device {
 
     @Id
@@ -15,9 +19,16 @@ public class Device {
     private String deviceType;
 
     private boolean available;
+    private String username;
 
-    public Device() {
+    public Device(String serialId, String model, String deviceType) {
 
+    }
+    public String getUsername() {
+        return username;
+    }
+    public String setUsername(String username) {
+        return this.username = username;
     }
 
     public Device(String serialId, String model, String deviceType, boolean available) {

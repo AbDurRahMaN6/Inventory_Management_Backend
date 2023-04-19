@@ -52,6 +52,33 @@ public class AdminController {
         }
     }
 
+    @PutMapping("/users/{id}")
+    public ResponseEntity<User> updateAdminUsers(@PathVariable("id") String id, @RequestBody User user) {
+        Optional<User> userData = userRepository.findById(id);
+
+        if (userData.isPresent()) {
+            User _user = userData.get();
+            _user.setUsername(user.getUsername());
+            _user.setEmail(user.getEmail());
+            _user.setPassword(user.getPassword());
+            _user.setRoles(user.getRoles());
+            _user.setRolling(user.getRolling());
+            return new ResponseEntity<>(userRepository.save(_user), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<HttpStatus> deleteAdminUsers(@PathVariable("id") String id) {
+        try {
+            userRepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/managers")
     public List<User> getAllManagers() {
         Optional<Role> role = roleRepository.findByName(UserRole.ROLE_MANAGER);
