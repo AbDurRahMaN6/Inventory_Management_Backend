@@ -4,15 +4,12 @@ import com.example.demo.models.Device;
 import com.example.demo.models.Role;
 import com.example.demo.models.User;
 import com.example.demo.models.UserRole;
-import com.example.demo.payload.request.LoginRequest;
 import com.example.demo.payload.request.SignupRequest;
-import com.example.demo.payload.response.JwtResponse;
 import com.example.demo.payload.response.MessageResponse;
 import com.example.demo.repository.DeviceRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.jwt.JwtUtils;
-import com.example.demo.security.services.UserDetailsImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,14 +46,15 @@ public class DeviceControllers {
 
 
     @GetMapping("/devices")
-    public ResponseEntity<List<Device>> getAllDevices(@RequestParam(required = false) String model) {
+    public ResponseEntity<List<Device>> getAllDevices() {
         try {
-            List<Device> devices = new ArrayList<Device>();
+            List<Device> devices = new ArrayList<>();
+            devices.addAll(deviceRepository.findAll());
 
-            if (model == null)
-                deviceRepository.findAll().forEach(devices::add);
-            else
-                deviceRepository.findByModelContaining(model).forEach(devices::add);
+//            if (model == null)
+//                devices.addAll(deviceRepository.findAll());
+//            else
+//                devices.addAll(deviceRepository.findByModelContaining(model));
 
             if (devices.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -67,6 +65,7 @@ public class DeviceControllers {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @GetMapping("/devices/{id}")
     public ResponseEntity<Device> getDevicesById(@PathVariable("id") String id) {
         Optional<Device> deviceData = deviceRepository.findById(id);
@@ -80,9 +79,8 @@ public class DeviceControllers {
 
     @PostMapping("/devices")
     public ResponseEntity<Device> createDevices(@RequestBody Device device) {
-//        log.error("An ERROR Message");
         try {
-            Device _device = deviceRepository.save(new Device(device.getSerialId(),device.getModel(), device.getDeviceType(), false));
+            Device _device = deviceRepository.save(new Device(device.getSerialId(), device.getModel(), device.getDeviceType(), false));
             return new ResponseEntity<>(_device, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -92,6 +90,9 @@ public class DeviceControllers {
     @PutMapping("/devices/{id}")
     public ResponseEntity<Device> updateDevices(@PathVariable("id") String id, @RequestBody Device device) {
         Optional<Device> deviceData = deviceRepository.findById(id);
+        Optional<Role> role = roleRepository.findByName(UserRole.ROLE_USER);
+        List<User> user = null;
+
 
         if (deviceData.isPresent()) {
             Device _device = deviceData.get();
@@ -99,11 +100,19 @@ public class DeviceControllers {
             _device.setModel(device.getModel());
             _device.setDeviceType(device.getDeviceType());
             _device.setAvailable(device.isAvailable());
-            return new ResponseEntity<>(deviceRepository.save(_device), HttpStatus.OK);
-        } else {
+            _device.setUsername(device.getUsername());
+            Device devicePersisted = deviceRepository.save(_device);
+            return new ResponseEntity<>(devicePersisted, HttpStatus.OK);
+        } else if (role.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        } else {
+            user = userRepository.findAll().stream().filter(user1 -> user1.getRoles().stream().anyMatch(role1 -> role1.getName()
+                    .equals(role.get().getName()))).collect(Collectors.toList());
         }
+        return null;
     }
+
 
     @DeleteMapping("/devices/{id}")
     public ResponseEntity<HttpStatus> deleteDevices(@PathVariable("id") String id) {
@@ -128,17 +137,6 @@ public class DeviceControllers {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-//    @PostMapping("/users")
-//    public ResponseEntity<User> createUsers(@RequestBody User user) {
-//        try {
-//            User _user = userRepository.save(new User(user.getUsername(),user.getEmail(),user.getPassword(), user.getRolling()));
-//            return new ResponseEntity<>(_user, HttpStatus.CREATED);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 
     @PostMapping("/users")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -243,28 +241,4 @@ public class DeviceControllers {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-//    User user = userRepository.findByUsername(username);
-//        if (user != null) {
-//        userRepository.delete(user);
-//    }
-
-//    @PostMapping("/{deviceId}/assign/{userId}")
-//    public ResponseEntity<?> assignDeviceToUser(@PathVariable("deviceId") String deviceId, @PathVariable("userId") String userId) {
-//        Device device = deviceService.getDeviceById(deviceId);
-//        User user = userService.getUserById(userId);
-//        if (device == null || user == null) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//        device.setUser(user);
-//        deviceService.saveDevice(device);
-//        return ResponseEntity.ok().build();
-//    }
-
-
-
-
-
-
 }

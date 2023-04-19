@@ -1,7 +1,10 @@
 package com.example.demo.controllers;
 
 import com.example.demo.models.Device;
+import com.example.demo.models.User;
 import com.example.demo.repository.DeviceRepository;
+import com.example.demo.repository.RoleRepository;
+import com.example.demo.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @CrossOrigin(origins = "*")
@@ -19,6 +23,14 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     DeviceRepository deviceRepository;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
+
+
 
     @GetMapping("/devices")
     public ResponseEntity<List<Device>> getAllDevices(@RequestParam(required = false) String model) {
@@ -52,4 +64,20 @@ public class UserController {
     }
 
 
+    @PostMapping("{username}/devices")
+    public ResponseEntity<Device> createUserDevices(@RequestBody Device device ){
+        try{
+            Device _device = deviceRepository.save(new Device(device.getSerialId(), device.getModel(), device.getDeviceType()));
+            return new ResponseEntity<>(_device, HttpStatus.CREATED);
+        }catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("{username}/myDevice")
+    public List<Device> getDeviceByUser() {
+        String id = "user";
+        return deviceRepository.findAll().stream().filter(device ->
+               device.getUsername() != null && device.getUsername().equals(id)).collect(Collectors.toList());
+    }
 }
