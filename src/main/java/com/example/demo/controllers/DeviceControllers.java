@@ -51,10 +51,6 @@ public class DeviceControllers {
             List<Device> devices = new ArrayList<>();
             devices.addAll(deviceRepository.findAll());
 
-//            if (model == null)
-//                devices.addAll(deviceRepository.findAll());
-//            else
-//                devices.addAll(deviceRepository.findByModelContaining(model));
 
             if (devices.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -99,8 +95,13 @@ public class DeviceControllers {
             _device.setSerialId(device.getSerialId());
             _device.setModel(device.getModel());
             _device.setDeviceType(device.getDeviceType());
-            _device.setAvailable(device.isAvailable());
-            _device.setUsername(device.getUsername());
+
+            if (!device.isAvailable()) {
+                _device.setUsername(device.getUsername());
+            }else {
+                _device.setUsername(null);
+
+            }
             Device devicePersisted = deviceRepository.save(_device);
             return new ResponseEntity<>(devicePersisted, HttpStatus.OK);
         } else if (role.isPresent()) {
@@ -138,6 +139,7 @@ public class DeviceControllers {
         }
     }
 
+
     @PostMapping("/users")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
@@ -152,7 +154,7 @@ public class DeviceControllers {
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        // Create new user's account
+
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()), signUpRequest.getRolling());
 

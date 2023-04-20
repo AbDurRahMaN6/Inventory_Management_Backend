@@ -5,8 +5,6 @@ import com.example.demo.models.User;
 import com.example.demo.models.UserRole;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.security.services.UserDetailsImpl;
-import com.example.demo.security.services.UserDetailsServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

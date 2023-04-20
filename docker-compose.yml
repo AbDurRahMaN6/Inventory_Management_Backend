@@ -1,12 +1,5 @@
 version: "3.7"
 services:
-#  api_service:
-#    build: src/main/java
-#    restart: always
-#    ports:
-#      - 8080:8080
-#    links:
-#      - mongo_db:app_db
   mongo_db:
     image: "mongo:4.4.3"
     restart: always

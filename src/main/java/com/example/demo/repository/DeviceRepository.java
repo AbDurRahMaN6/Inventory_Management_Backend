@@ -11,6 +11,4 @@ public interface DeviceRepository extends MongoRepository<Device, String> {
     List<Device> findByAvailable(boolean available);
 
     List<Device> findByModelContaining(String model);
-
-//    List<User>findByUsername(String username);
 }

@@ -1,7 +1,6 @@
 package com.example.demo.controllers;
 
 import com.example.demo.models.Device;
-import com.example.demo.models.User;
 import com.example.demo.repository.DeviceRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
@@ -52,29 +51,8 @@ public class UserController {
         }
     }
 
-    @GetMapping("/devices/{id}")
-    public ResponseEntity<Device> getDevicesById(@PathVariable("id") String id) {
-        Optional<Device> deviceData = deviceRepository.findById(id);
 
-        if (deviceData.isPresent()) {
-            return new ResponseEntity<>(deviceData.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-
-    @PostMapping("{username}/devices")
-    public ResponseEntity<Device> createUserDevices(@RequestBody Device device ){
-        try{
-            Device _device = deviceRepository.save(new Device(device.getSerialId(), device.getModel(), device.getDeviceType()));
-            return new ResponseEntity<>(_device, HttpStatus.CREATED);
-        }catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("{username}/myDevice")
+    @GetMapping("/myDevice/{username}")
     public List<Device> getDeviceByUser() {
         String id = "user";
         return deviceRepository.findAll().stream().filter(device ->
