@@ -45,22 +45,6 @@ public class DeviceControllers {
     JwtUtils jwtUtils;
 
 
-    @GetMapping("/devices")
-    public ResponseEntity<List<Device>> getAllDevices() {
-        try {
-            List<Device> devices = new ArrayList<>();
-            devices.addAll(deviceRepository.findAll());
-
-
-            if (devices.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-
-            return new ResponseEntity<>(devices, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     @GetMapping("/devices/{id}")
     public ResponseEntity<Device> getDevicesById(@PathVariable("id") String id) {
@@ -76,7 +60,11 @@ public class DeviceControllers {
     @PostMapping("/devices")
     public ResponseEntity<Device> createDevices(@RequestBody Device device) {
         try {
-            Device _device = deviceRepository.save(new Device(device.getSerialId(), device.getModel(), device.getDeviceType(), false));
+            Device device1 = new Device();
+//            device1.setUsername("");
+            Device _device = deviceRepository.save(new Device(device.getId(), device.getSerialId(), device.getModel(),
+                    device.getUsername(), device.getStatus(), device.getDeviceStatus(), device.getDeviceType(),
+                    device.getOperatingSystem()));
             return new ResponseEntity<>(_device, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -89,19 +77,14 @@ public class DeviceControllers {
         Optional<Role> role = roleRepository.findByName(UserRole.ROLE_USER);
         List<User> user = null;
 
-
         if (deviceData.isPresent()) {
             Device _device = deviceData.get();
-            _device.setSerialId(device.getSerialId());
             _device.setModel(device.getModel());
             _device.setDeviceType(device.getDeviceType());
+            _device.setDeviceStatus(device.getDeviceStatus());
+            _device.setUsername(device.getUsername());
+            _device.setStatus(device.getStatus());
 
-            if (!device.isAvailable()) {
-                _device.setUsername(device.getUsername());
-            }else {
-                _device.setUsername(null);
-
-            }
             Device devicePersisted = deviceRepository.save(_device);
             return new ResponseEntity<>(devicePersisted, HttpStatus.OK);
         } else if (role.isPresent()) {
@@ -125,19 +108,7 @@ public class DeviceControllers {
         }
     }
 
-    @GetMapping("/devices/available")
-    public ResponseEntity<List<Device>> findByAvailable() {
-        try {
-            List<Device> devices = deviceRepository.findByAvailable(true);
 
-            if (devices.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(devices, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
 
     @PostMapping("/users")
@@ -155,8 +126,10 @@ public class DeviceControllers {
         }
 
 
-        User user = new User(signUpRequest.getUsername(),
-                signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()), signUpRequest.getRolling());
+        User user = new User();
+        user.setUsername(signUpRequest.getUsername());
+        user.setEmail(signUpRequest.getEmail());
+        user.setPassword(signUpRequest.getPassword());
 
         Set<String> strRoles = signUpRequest.getRoles();
         Set<Role> roles = new HashSet<>();
@@ -168,17 +141,6 @@ public class DeviceControllers {
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "ROLE_ADMIN":
-                        Role adminRole = roleRepository.findByName(UserRole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
-                    case "ROLE_MANAGER":
-                        Role managerRole = roleRepository.findByName(UserRole.ROLE_MANAGER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(managerRole);
-
-                        break;
                     default:
                         Role userRole = roleRepository.findByName(UserRole.ROLE_USER)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -189,9 +151,29 @@ public class DeviceControllers {
 
         user.setRoles(roles);
         userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return ResponseEntity.ok(savedUser);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
 
+    @GetMapping("/devices")
+    public ResponseEntity<List<Device>> getSearchDevices(@RequestParam(required = false) String model) {
+        try {
+            List<Device> devices = new ArrayList<Device>();
+
+            if (model == null)
+                deviceRepository.findAll().forEach(devices::add);
+            else
+                deviceRepository.findByModelContaining(model).forEach(devices::add);
+
+            if (devices.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(devices, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -227,20 +209,88 @@ public class DeviceControllers {
             _user.setEmail(user.getEmail());
             _user.setPassword(user.getPassword());
             _user.setRoles(user.getRoles());
-            _user.setRolling(user.getRolling());
             return new ResponseEntity<>(userRepository.save(_user), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/user/{id}")
     public ResponseEntity<HttpStatus> deleteUsers(@PathVariable("id") String id) {
+
         try {
             userRepository.deleteById(id);
+
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<HttpStatus> deleteUser (@PathVariable("id") String id){
+
+        Optional<User> optionalUser = userRepository.findById(id);
+        if(optionalUser.isPresent()){
+            User user = optionalUser.get();
+
+
+            List<Device> devices = deviceRepository.findByUsername(user.getUsername());
+            for (Device device: devices){
+                device.setStatus(Device.Status.NOT_ASSIGNED);
+                device.setUsername(null);
+                deviceRepository.save(device);
+
+            }
+
+            userRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+
+        }
+            return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/managers")
+    public ResponseEntity<?> registerManager(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+
+        User user = new User();
+        user.setUsername(signUpRequest.getUsername());
+        user.setEmail(signUpRequest.getEmail());
+        user.setPassword(signUpRequest.getPassword());
+
+        Set<String> strRoles = signUpRequest.getRoles();
+        Set<Role> roles = new HashSet<>();
+
+        if (strRoles == null) {
+            Role userRole = roleRepository.findByName(UserRole.ROLE_MANAGER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role -> {
+                switch (role) {
+                    default:
+                        Role userRole = roleRepository.findByName(UserRole.ROLE_MANAGER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(userRole);
+                }
+            });
+        }
+
+        user.setRoles(roles);
+        userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return ResponseEntity.ok(savedUser);
     }
 }

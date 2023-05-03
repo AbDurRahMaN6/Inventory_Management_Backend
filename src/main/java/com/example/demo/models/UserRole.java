@@ -5,3 +5,4 @@ public enum UserRole {
     ROLE_MANAGER,
     ROLE_ADMIN
 }
+

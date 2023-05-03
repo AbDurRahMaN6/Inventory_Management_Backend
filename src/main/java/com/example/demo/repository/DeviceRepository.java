@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.Query;
 import java.util.List;
 
 public interface DeviceRepository extends MongoRepository<Device, String> {
-    List<Device> findByAvailable(boolean available);
 
     List<Device> findByModelContaining(String model);
+    List<Device> findByUsername(String username);
 }
